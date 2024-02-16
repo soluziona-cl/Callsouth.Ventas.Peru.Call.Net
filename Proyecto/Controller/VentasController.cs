@@ -65,6 +65,24 @@ namespace CallSouth.Ventas.Peru.Call.Controller
         }
 
         [HttpPost]
+        [Route("Call/Profesiones")]
+        public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_ConectaProfesiones(Flujo_ingreso flujo_In)
+        {
+            string stored = "exec ddl_profesion ";
+
+            try
+            {
+                return await _context.flujo_Respuestas.FromSqlRaw(stored).AsNoTracking().ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                return Problem(title: "No se ha podido ejecutar accion", detail: stored);
+            }
+
+        }
+
+        [HttpPost]
         [Route("Call/ConectaCliente")]
         public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_ConectaCliente(Flujo_ingreso flujo_In)
         {
@@ -75,8 +93,22 @@ namespace CallSouth.Ventas.Peru.Call.Controller
             return await _context.flujo_Respuestas.FromSqlRaw(stored).AsNoTracking().ToListAsync();
            
         }
-        
-        
+
+
+
+        [HttpPost]
+        [Route("Call/listas")]
+        public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_Listas(Flujo_ingreso flujo_In)
+        {
+
+            string stored = "exec sp_call_listas  @pTYPE='" + flujo_In.dato + "', @id='" + flujo_In.dato_1 + "', @id_2='" + flujo_In.dato_2 + "', @id_3='" + flujo_In.dato_3 + "';";
+            //return await _context.TblOpcionLlamada.FromSqlRaw(stored).AsNoTracking().ToListAsync();
+
+            return await _context.flujo_Respuestas.FromSqlRaw(stored).AsNoTracking().ToListAsync();
+
+        }
+
+
         [HttpPost]
         [Route("Call/ConectaClienteInteresa")]
         public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_ConectaClienteInteresa(Flujo_ingreso flujo_In)
@@ -100,8 +132,19 @@ namespace CallSouth.Ventas.Peru.Call.Controller
             return await _context.flujo_Respuestas.FromSqlRaw(stored).AsNoTracking().ToListAsync();
 
         }
-        
-        
+
+        [HttpPost]
+        [Authorize(Roles = "CRM_Supervisor")]
+        [Route("CRM/Gestion/Regrabaciones")]
+        public async Task<List<Flujo_Respuesta>> Get_GestionRegrabacion(Flujo_ingreso flujo_In)
+        {
+            string stored = "exec sp_listar_regrabaciones  @fecha='" + flujo_In.dato + "', @company='" + flujo_In.dato_1 + "';";
+
+            return await _context.flujo_Respuestas.FromSqlRaw(stored).AsNoTracking().ToListAsync();
+
+        }
+
+
         [HttpPost]
         [Route("Call/SaveURl")]
         public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_SaveUrl(Flujo_ingreso flujo_In)
@@ -180,6 +223,24 @@ namespace CallSouth.Ventas.Peru.Call.Controller
 
 
         }
+
+        [HttpPost]
+        [Route("Call/GuardaGestion/Inchape")]
+        public async Task<ActionResult<IEnumerable<Flujo_Respuesta>>> Get_GuardarVentaInchape(dynamic DynamicClass)
+        {
+
+            string Input = JsonConvert.SerializeObject(DynamicClass);
+
+            Input = Input.Replace("{", "{{").Replace("}", "}}");
+
+            string stored = "exec sp_inserta_gestion_inchape @objeto='" + Input.ToString() + "';";
+
+            return await _context.flujo_Respuestas.FromSqlRaw(stored).ToListAsync();
+
+
+        }
+
+
 
         [HttpPost]
         [Route("Call/DatosCliente/Regrabacion")]
